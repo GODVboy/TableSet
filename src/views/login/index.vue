@@ -9,7 +9,7 @@
       label-position="left"
     >
       <div class="title-container">
-        <h3 class="title">网络自动化管理平台</h3>
+        <h3 class="title">后台管理平台</h3>
       </div>
       <el-form-item prop="username">
         <span class="svg-container">
@@ -42,37 +42,28 @@
           @keyup.enter.native="handleLogin"
         />
         <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+          <svg-icon
+            :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'"
+          />
         </span>
-      </el-form-item>
-      <el-form-item prop="local" style="background-color: transparent;border: none">
-        <div style="display: flex;justify-content: space-around;">
-          <el-radio v-model="loginForm.local" :label="0">
-            <span style="color: white">域用户</span>
-          </el-radio>
-          <el-radio v-model="loginForm.local" :label="1">
-            <span style="color: white">本地用户</span>
-          </el-radio>
-        </div>
       </el-form-item>
       <div style="margin: 20px"></div>
       <el-button
         :loading="loading"
         type="primary"
-        style="width:100%;margin-bottom:30px;"
+        style="width: 100%; margin-bottom: 30px"
         @click.native.prevent="handleLogin"
-      >登录系统</el-button>
-      <!-- <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
+        >登录系统</el-button
+      >
+      <div class="tips">
+        <span style="margin-right: 20px">username: admin</span>
         <span> password: 12345678</span>
-      </div>-->
+      </div>
     </el-form>
   </div>
 </template>
 
 <script>
-import urlTool from "url";
-import querystring from "querystring";
 import { validUsername } from "@/utils/validate";
 
 export default {
@@ -93,36 +84,30 @@ export default {
       }
     };
     return {
-      // loginForm: {
-      //   username: 'admin',
-      //   password: '12345678'
-      // },
       loginForm: {
-        username: "",
-        password: "",
-        local: 0
+        username: "admin",
+        password: "12345678",
       },
       loginRules: {
         username: [
-          { required: true, trigger: "blur", validator: validateUsername }
+          { required: true, trigger: "blur", validator: validateUsername },
         ],
         password: [
-          { required: true, trigger: "blur", validator: validatePassword }
+          { required: true, trigger: "blur", validator: validatePassword },
         ],
-        local: [{ required: true, trigger: "blur", message: "" }]
       },
       loading: false, // 登录loading
       passwordType: "password",
-      redirect: undefined
+      redirect: undefined,
     };
   },
   watch: {
     $route: {
-      handler: function(route) {
+      handler: function (route) {
         this.redirect = route.query && route.query.redirect;
       },
-      immediate: true
-    }
+      immediate: true,
+    },
   },
   methods: {
     showPwd() {
@@ -136,18 +121,18 @@ export default {
       });
     },
     handleLogin() {
-      this.$refs.loginForm.validate(valid => {
+      this.$refs.loginForm.validate((valid) => {
         if (valid) {
           this.loading = true;
           this.$store
             .dispatch("user/login", this.loginForm)
             .then(() => {
               this.$router.push({
-                path: this.redirect || "/"
+                path: this.redirect || "/",
               });
               this.loading = false;
             })
-            .catch(err => {
+            .catch((err) => {
               console.log(err.message);
               this.loading = false;
             });
@@ -156,35 +141,8 @@ export default {
           return false;
         }
       });
-    }
+    },
   },
-  created() {
-    // 处理从运维统一跳转
-    console.log(urlTool.parse(window.location.href));
-    const urlMsg = urlTool.parse(window.location.href);
-    if (urlMsg.query && urlMsg.query.includes("access_token")) {
-      // 定义提交的参数
-      const accessToken = querystring.parse(urlMsg.query)["access_token"];
-      const jumpLogingParam = {
-        username: "access_token",
-        password: "access_token",
-        accessToken
-      };
-      const loading = this.$message.loading("正在登录", 0);
-      this.$store
-        .dispatch("user/login", jumpLogingParam)
-        .then(() => {
-          // this.$router.push({ path: "/", query: {} });
-          //this.$router.push({ path: this.redirect || "/" });
-          setTimeout(loading, 0);
-          window.location.href = "/";
-        })
-        .catch(err => {
-          setTimeout(loading, 0);
-          console.log(err.message);
-        });
-    }
-  }
 };
 </script>
 
